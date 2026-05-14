@@ -2,51 +2,163 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Portal Taller de Internet - Inicio</title>
-  <link rel="stylesheet" href="css/estilos.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <title>Gestión de Alumnos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1 {
+      text-align: center;
+    }
+    form {
+      margin-bottom: 20px;
+    }
+    form label {
+      margin-right: 10px;
+    }
+    input[type="text"] {
+      padding: 6px;
+      margin: 4px 0;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 6px 12px;
+      margin: 4px;
+      cursor: pointer;
+    }
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #f2f2f2;
+    }
+    tr:hover {
+      background-color: #f9f9f9;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <div class="header-content">
-      <a href="index.html" class="logo">Portal Taller de Internet</a>
-      <nav id="authLinks">
-        <a href="login.html" class="btn-login">Iniciar Sesion</a>
-        <button id="darkModeToggle" class="btn-darkmode" onclick="toggleDarkMode()">🌙</button>
-      </nav>
-    </div>
-  </header>
+  <h1>Gestión de Alumnos</h1>
 
-  <main class="container">
-    <section class="hero-section">
-      <h1>Bienvenido al Portal de Noticias</h1>
-      <p>Las ultimas noticias de Desarrollo Web y Ciencia de Datos</p>
-    </section>
+  <form id="studentForm">
+    <input type="hidden" id="studentIndex" value="-1">
+    <label>
+      Nombre: 
+      <input type="text" id="nombre" required>
+    </label>
+    <label>
+      Apellido: 
+      <input type="text" id="apellido" required>
+    </label>
+    <label>
+      DNI: 
+      <input type="text" id="dni" required>
+    </label>
+    <button type="submit" id="submitBtn">Agregar Alumno</button>
+  </form>
 
-    <section class="dolar-section">
-      <h3>Cotizacion del Dolar</h3>
-      <div id="dolarContainer">
-        <p>Cargando...</p>
-      </div>
-    </section>
+  <table id="studentsTable">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>DNI</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Se generarán dinámicamente las filas de la tabla -->
+    </tbody>
+  </table>
 
-    <section>
-      <h2 class="section-title">Ultimas Noticias</h2>
-      <div id="noticiasContainer" class="noticias-grid">
-        <p>Cargando noticias...</p>
-      </div>
-    </section>
-  </main>
+  <script>
+    // Array para almacenar los alumnos
+    let students = [];
 
-  <footer>
-    <p>2026 Portal Taller de Internet</p>
-  </footer>
+    // Evento submit del formulario
+    document.getElementById('studentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // Obtener los datos del formulario
+      let nombre = document.getElementById('nombre').value;
+      let apellido = document.getElementById('apellido').value;
+      let dni = document.getElementById('dni').value;
+      let index = document.getElementById('studentIndex').value;
 
-  <script src="js/api.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/main.js"></script>
+      // Si index es -1, se agrega un alumno nuevo; si no, se actualiza el existente
+      if (index == -1) {
+        students.push({ nombre, apellido, dni });
+      } else {
+        students[index] = { nombre, apellido, dni };
+        // Resetear el índice y el botón
+        document.getElementById('studentIndex').value = -1;
+        document.getElementById('submitBtn').textContent = 'Agregar Alumno';
+      }
+
+      // Limpiar el formulario
+      document.getElementById('studentForm').reset();
+      renderTable();
+    });
+
+    // Función para renderizar la tabla con los alumnos
+    function renderTable() {
+      let tbody = document.querySelector('#studentsTable tbody');
+      tbody.innerHTML = '';
+
+      students.forEach((student, index) => {
+        let row = document.createElement('tr');
+
+        // Crear celdas para nombre, apellido y dni
+        let tdNombre = document.createElement('td');
+        tdNombre.textContent = student.nombre;
+        row.appendChild(tdNombre);
+
+        let tdApellido = document.createElement('td');
+        tdApellido.textContent = student.apellido;
+        row.appendChild(tdApellido);
+
+        let tdDNI = document.createElement('td');
+        tdDNI.textContent = student.dni;
+        row.appendChild(tdDNI);
+
+        // Crear celdas de acciones (editar y eliminar)
+        let tdActions = document.createElement('td');
+
+        // Botón de editar
+        let editBtn = document.createElement('button');
+        editBtn.textContent = 'Editar';
+        editBtn.addEventListener('click', function() {
+          document.getElementById('nombre').value = student.nombre;
+          document.getElementById('apellido').value = student.apellido;
+          document.getElementById('dni').value = student.dni;
+          document.getElementById('studentIndex').value = index;
+          document.getElementById('submitBtn').textContent = 'Actualizar Alumno';
+        });
+        tdActions.appendChild(editBtn);
+
+        // Botón de eliminar
+        let deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Eliminar';
+        deleteBtn.addEventListener('click', function() {
+          if (confirm('¿Estás seguro de eliminar este alumno?')) {
+            students.splice(index, 1);
+            renderTable();
+          }
+        });
+        tdActions.appendChild(deleteBtn);
+
+        row.appendChild(tdActions);
+        tbody.appendChild(row);
+      });
+    }
+  </script>
 </body>
 </html>
