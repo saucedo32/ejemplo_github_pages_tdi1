@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "titulo": "JavaScript: El Lenguaje que Dominó la Web",
+    "descripcion": "JavaScript se ha consolidado como el lenguaje de programación más usado en el desarrollo web. Con el surgimiento de Node.js y frameworks modernos, su alcance se ha expandido significativamente.",
+    "imagen": "https://images.unsplash.com/photo-1579468118864-1b8eaee9685f?w=400"
+  },
+  {
+    "id": 2,
+    "titulo": "Introducción a React.js",
+    "descripcion": "React.js revolucionó la forma de construir interfaces de usuario. Su componente basado en arquitectura y virtual DOM lo convierten en una herramienta indispensable para desarrolladores frontend.",
+    "imagen": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400"
+  },
+  {
+    "id": 3,
+    "titulo": "CSS Grid vs Flexbox: ¿Cuándo Usar Cuál?",
+    "descripcion": "Entender las diferencias entre CSS Grid y Flexbox es crucial para el diseño web moderno. Mientras Flexbox es ideal para layouts unidimensionales, Grid brilla en layouts bidimensionales complejos.",
+    "imagen": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400"
+  },
+  {
+    "id": 4,
+    "titulo": "Machine Learning con Python",
+    "descripcion": "Python se ha convertido en el lenguaje preferido para científicos de datos. Librerías como Scikit-learn y TensorFlow facilitan la implementación de algoritmos de machine learning.",
+    "imagen": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400"
+  },
+  {
+    "id": 5,
+    "titulo": "Data Science: El Rol del Siglo XXI",
+    "descripcion": "Los científicos de datos son profesionistas altamente demandados. Las empresas buscan profesionales capaces de transformar datos en insights valiosos para la toma de decisiones.",
+    "imagen": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400"
+  },
+  {
+    "id": 6,
+    "titulo": "Big Data y Análisis Predictivo",
+    "descripcion": "El análisis predictivo permite a las organizaciones anticipar tendencias y comportamientos futuros. Herramientas como Apache Spark y Hadoop son fundamentales para procesar grandes volúmenes de datos.",
+    "imagen": "https://images.unsplash.com/photo-1460925895917-afdab827c52c?w=400"
+  }
+]

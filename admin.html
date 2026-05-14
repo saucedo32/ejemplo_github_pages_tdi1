@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Taller de Internet - Admin</title>
+  <link rel="stylesheet" href="css/estilos.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <a href="index.html" class="logo">📰 Portal Taller de Internet</a>
+      <nav>
+        <a href="index.html">🏠 Volver al Inicio</a>
+        <button id="darkModeToggle" class="btn-darkmode" onclick="toggleDarkMode()">🌙</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="admin-container">
+      <div class="admin-header">
+        <h2>Panel de Administración</h2>
+        <div class="admin-actions">
+          <button id="volverHomeBtn" class="btn-volver">🏠 Volver al Inicio</button>
+          <button id="cerrarSesionBtn" class="btn-cerrar">Cerrar Sesión</button>
+        </div>
+      </div>
+
+      <div class="admin-panel">
+        <div class="form-panel">
+          <h3 id="formTitle">Agregar Noticia</h3>
+          <form id="noticiaForm">
+            <div class="form-group">
+              <label for="titulo">Título</label>
+              <input type="text" id="titulo" placeholder="Título de la noticia" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="descripcion">Descripción</label>
+              <textarea id="descripcion" rows="4" placeholder="Descripción de la noticia" required></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="imagen">URL de Imagen</label>
+              <input type="url" id="imagen" placeholder="https://ejemplo.com/imagen.jpg" required>
+            </div>
+            
+            <button type="submit" id="btnSubmit" class="btn-primary">Agregar Noticia</button>
+            <button type="button" id="btnCancelar" class="btn-cancelar" onclick="cancelarEdicion()">Cancelar</button>
+          </form>
+        </div>
+
+        <div class="list-panel">
+          <h3>Lista de Noticias</h3>
+          <table class="noticias-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Imagen</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="noticiasTableBody">
+              <tr><td colspan="4">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 Portal Taller de Internet - Todos los derechos reservados</p>
+  </footer>
+
+  <script type="module">
+    const SESSION_KEY = 'session';
+    const NOTICIAS_KEY = 'noticias';
+    let modoEdicion = false;
+    let noticiaEditandoId = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      requireAuth();
+      cargarNoticiasEnTabla();
+      setupFormulario();
+      
+      document.getElementById('cerrarSesionBtn')?.addEventListener('click', () => {
+        localStorage.removeItem('session');
+        window.location.href = 'index.html';
+      });
+      
+      document.getElementById('volverHomeBtn')?.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    });
+
+    function requireAuth() {
+      const session = getSession();
+      if (!session || !session.isAdmin) {
+        window.location.href = 'login.html';
+        return false;
+      }
+      return true;
+    }
+
+    function getSession() {
+      const session = localStorage.getItem(SESSION_KEY);
+      return session ? JSON.parse(session) : null;
+    }
+
+    function setupFormulario() {
+      const form = document.getElementById('noticiaForm');
+      form?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const titulo = document.getElementById('titulo').value;
+        const descripcion = document.getElementById('descripcion').value;
+        const imagen = document.getElementById('imagen').value;
+        
+        if (!titulo || !descripcion || !imagen) {
+          alert('Por favor complete todos los campos');
+          return;
+        }
+        
+        if (modoEdicion) {
+          modificarNoticia(noticiaEditandoId, { titulo, descripcion, imagen });
+        } else {
+          agregarNoticia({ titulo, descripcion, imagen });
+        }
+        
+        form.reset();
+        modoEdicion = false;
+        noticiaEditandoId = null;
+        document.getElementById('btnSubmit').textContent = 'Agregar Noticia';
+        document.getElementById('formTitle').textContent = 'Agregar Noticia';
+        document.getElementById('btnCancelar').style.display = 'none';
+      });
+    }
+
+    function agregarNoticia(noticia) {
+      const noticias = getNoticias();
+      const nuevoId = noticias.length > 0 ? Math.max(...noticias.map(n => n.id)) + 1 : 1;
+      
+      noticias.push({ ...noticia, id: nuevoId });
+      saveNoticias(noticias);
+      cargarNoticiasEnTabla();
+    }
+
+    function modificarNoticia(id, noticiaActualizada) {
+      const noticias = getNoticias();
+      const index = noticias.findIndex(n => n.id === id);
+      
+      if (index !== -1) {
+        noticias[index] = { ...noticias[index], ...noticiaActualizada };
+        saveNoticias(noticias);
+        cargarNoticiasEnTabla();
+      }
+    }
+
+    function eliminarNoticia(id) {
+      if (!confirm('¿Está seguro de eliminar esta noticia?')) return;
+      
+      const noticias = getNoticias();
+      const filtradas = noticias.filter(n => n.id !== id);
+      saveNoticias(filtradas);
+      cargarNoticiasEnTabla();
+    }
+
+    function getNoticias() {
+      const noticias = localStorage.getItem(NOTICIAS_KEY);
+      return noticias ? JSON.parse(noticias) : [];
+    }
+
+    function saveNoticias(noticias) {
+      localStorage.setItem(NOTICIAS_KEY, JSON.stringify(noticias));
+    }
+
+    function cargarNoticiasEnTabla() {
+      const tbody = document.getElementById('noticiasTableBody');
+      const noticias = getNoticias();
+      
+      if (!tbody) return;
+      
+      if (noticias.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4">No hay noticias</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = noticias.map(n => `
+        <tr>
+          <td>${n.titulo}</td>
+          <td>${n.descripcion.substring(0, 50)}...</td>
+          <td><img src="${n.imagen}" alt="${n.titulo}" class="thumb"></td>
+          <td>
+            <button onclick="window.editarNoticia(${n.id})" class="btn-edit">✏️</button>
+            <button onclick="window.eliminarNoticia(${n.id})" class="btn-delete">🗑️</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    window.editarNoticia = function(id) {
+      const noticias = getNoticias();
+      const noticia = noticias.find(n => n.id === id);
+      
+      if (!noticia) return;
+      
+      document.getElementById('titulo').value = noticia.titulo;
+      document.getElementById('descripcion').value = noticia.descripcion;
+      document.getElementById('imagen').value = noticia.imagen;
+      
+      modoEdicion = true;
+      noticiaEditandoId = id;
+      document.getElementById('btnSubmit').textContent = 'Actualizar Noticia';
+      document.getElementById('formTitle').textContent = 'Editar Noticia';
+      document.getElementById('btnCancelar').style.display = 'inline-block';
+    };
+
+    window.eliminarNoticia = eliminarNoticia;
+
+    window.cancelarEdicion = function() {
+      const form = document.getElementById('noticiaForm');
+      form.reset();
+      modoEdicion = false;
+      noticiaEditandoId = null;
+      document.getElementById('btnSubmit').textContent = 'Agregar Noticia';
+      document.getElementById('formTitle').textContent = 'Agregar Noticia';
+      document.getElementById('btnCancelar').style.display = 'none';
+    };
+  </script>
+  <script src="js/main.js"></script>
+</body>
+</html>
